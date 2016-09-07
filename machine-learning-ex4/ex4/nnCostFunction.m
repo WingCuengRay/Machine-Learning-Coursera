@@ -62,24 +62,47 @@ Theta2_grad = zeros(size(Theta2));
 %               and Theta2_grad from Part 2.
 %
 
-% ************** Part1 *************************%
+% ************** Part1 ************************* %
 % 添加 bias 项
 X = [ones(m, 1), X];
-hid_layer = zeros(m, hidden_layer_size);
+a_2 = zeros(m, hidden_layer_size);
 output = zeros(m, num_labels);
 
-hid_layer = sigmoid(X * Theta1');
-hid_layer = [ones(m, 1), hid_layer];
-output2 = sigmoid(hid_layer * Theta2');
+a_2 = sigmoid(X * Theta1');
+a_2 = [ones(m, 1), a_2];
+a_3 = sigmoid(a_2 * Theta2');
 y_recode = eye(num_labels)(y,:);     % y 是 5000*1 的 vector, 需要将其 recode 成 5000*10 的形式
 
-tmp = y_recode.*log(output2) + (1-y_recode).*log(1-output2);
+tmp = y_recode.*log(a_3) + (1-y_recode).*log(1-a_3);
 cost = -1/m * sum(sum(tmp, 2));
 
-J = cost;
+
+% ************* Part2 ************************** %
+% 正则化的项就是 将所有层的 Theta 全部加起来，但要注意不能加上 bias 项的 Theta
+reg_term = lambda/(2*m) * ...
+          (sum(sum(Theta2(:, 2:end).^2)) + sum(sum(Theta1(:, 2:end).^2)));
+
+
+J = cost+reg_term;
+
+% ************* Part3 ************************** %
+
+delta_3 = a_3 - y_recode;     % m*10 matrix
+delta_2 = delta_3*Theta2 .* a_2 .* (1-a_2);  % m*26 matrix
+
+
+% a_2 is m*26 matrix while delta_3 is m*10 matrix
+% Theta1 is 25*401, Theta2 is 10*26
+DELTA_2 = delta_3' * a_2;               % 10*26
+DELTA_1 = delta_2(:, 2:end)' * X;       % 25*401
+
+
+Theta1_grad = 1/m *(DELTA_1 + lambda*[zeros(size(Theta1,1), 1), Theta1(:,2:end)]);
+Theta2_grad = 1/m *(DELTA_2 + lambda*[zeros(size(Theta2,1), 1), Theta2(:,2:end)]);
 
 
 
+grad = [Theta1_grad(:) ; Theta2_grad(:)];
 
 
 
