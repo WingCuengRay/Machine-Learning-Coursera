@@ -24,8 +24,22 @@ sigma = 0.3;
 %
 
 
-
-
+min = 1;
+testval = [0.01 0.03 0.1 0.3 1 3 10 30];
+for i=1 : length(testval)
+	tmpC = testval(i);
+	for j=1 : length(testval)
+		tmpSigma = testval(j);
+		model= svmTrain(X, y, tmpC, @(x1, x2) gaussianKernel(x1, x2, tmpSigma));
+		pred = svmPredict(model, Xval);
+		res = mean(double(pred != yval));
+		if res < min
+			min = res;
+			C = tmpC;
+			sigma = tmpSigma;
+		end
+	end
+end
 
 
 

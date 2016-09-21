@@ -172,7 +172,7 @@ while passes < max_passes,
     dots = dots + 1;
     if dots > 78
         dots = 0;
-        fprintf('\n');
+        % fprintf('\n');
     end
     if exist('OCTAVE_VERSION')
         fflush(stdout);
